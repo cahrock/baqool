@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
+import { Redirect } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../../hooks/useAuth';
 
-export default function App() {
+export default function Home() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <Text>Loading…</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Baqool Mobile is running 👋</Text>
-      <StatusBar style="auto" />
+    <View style={styles.center}>
+      <Text>Welcome, {user.email}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
