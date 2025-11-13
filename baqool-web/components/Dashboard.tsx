@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
               Welcome <span role="img" aria-label="wave">👋</span>
             </h1>
             <p className="mt-2 text-base text-slate-700">
-              Signed in as <span className="font-semibold">{user.email}</span>
+              Signed in as {' '} <span className="font-semibold"> {user.name || user.email}</span>
             </p>
           </div>
 

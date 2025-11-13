@@ -24,10 +24,10 @@ export class AuthService {
             name: registerDto.name,
         });
 
-        const token = await this.signToken(user.id, user.email);
+        const accessToken = await this.signToken(user.id, user.email, user.name ?? '');  
         return {
             user: { id: user.id, email: user.email, name: user.name },
-            accessToken: token,};
+            accessToken: accessToken,};
     }
     async login(loginDto: LoginDto) {
         const user = await this.usersService.getUserByEmail(loginDto.email);
@@ -38,13 +38,13 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
-        const token = await this.signToken(user.id, user.email);
-        const payload = { sub: user.id, email: user.email };
-        return { accessToken: token };
+
+        const accessToken = await this.signToken(user.id, user.email, user.name ?? '');
+        return { accessToken: accessToken };
     }
 
-    private async signToken(userId: string, email: string): Promise<string> {
-        const payload = { sub: userId, email };
+    private async signToken(userId: string, email: string, name: string): Promise<string> {
+        const payload = { sub: userId, email, name };        
         return this.jwtService.signAsync(payload);
     }
 
