@@ -7,10 +7,10 @@ const PORT = 3000;
 
 const API_BASE_URL =
   Platform.OS === 'ios'
-    ? `http://localhost:${PORT}`
+    ? `http://localhost:${PORT}` // iOS simulator only
     : Platform.OS === 'android'
-      ? `http://${LAN_IP}:${PORT}`
-      : `http://localhost:${PORT}`;
+      ? `http://${LAN_IP}:${PORT}` // Android emulator or physical device
+      : `http://localhost:${PORT}`; // web
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/auth`,
@@ -18,7 +18,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await getToken();           // new
+  const token = await getToken();
   if (token) {
     config.headers = config.headers ?? {};
     (config.headers as any).Authorization = `Bearer ${token}`;

@@ -11,6 +11,8 @@ async function bootstrap() {
       'http://localhost:8081',  // older Expo web port
       'http://localhost:19006', // current Expo web port
       'http://localhost:3000',  // generic web dev
+      'http://localhost:3001',  // generic web dev
+      'http://localhost:4000',  // generic web dev
       'http://localhost:5173',  // Vite
     ],
     credentials: false,
@@ -25,7 +27,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  await app.listen(4000, '0.0.0.0'); // <— important for devices on your network
   console.log(`✅ API listening on http://localhost:3000`);
 }
 
