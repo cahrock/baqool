@@ -30,7 +30,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     me(@Req() req: any) {
-        // req.user is set by JwtStrategy.validate
-        return req.user;
+        //  req.user.userId comes from JwtStrategy.validate()
+        return this.authService.getMe(req.user.userId);
     }
 }

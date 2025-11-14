@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -41,6 +41,16 @@ export class AuthService {
 
         const accessToken = await this.signToken(user.id, user.email, user.name ?? '');
         return { accessToken: accessToken };
+    }
+
+    async getMe(userId: string) {
+        const user = await this.usersService.getUserById(userId);
+        if (!user) {
+        throw new NotFoundException('User not found');
+        }
+
+        const { id, email, name } = user;
+        return { id, email, name };
     }
 
     private async signToken(userId: string, email: string, name: string): Promise<string> {
