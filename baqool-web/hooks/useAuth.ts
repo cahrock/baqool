@@ -39,7 +39,7 @@ export function useAuth(): AuthContext {
   //
   async function fetchProfile(token: string) {
     try {
-      const res = await api.get('/me', {
+      const res = await api.get('/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -60,7 +60,7 @@ export function useAuth(): AuthContext {
   // Login
   //
   async function login(email: string, password: string) {
-    const { data } = await api.post('/login', { email, password });
+    const { data } = await api.post('/auth/login', { email, password });
 
     localStorage.setItem('accessToken', data.accessToken);
     await fetchProfile(data.accessToken);
@@ -70,7 +70,7 @@ export function useAuth(): AuthContext {
   // Register
   //
   async function register(email: string, password: string, name?: string) {
-    const { data } = await api.post('/register', { email, password, name });
+    const { data } = await api.post('/auth/register', { email, password, name });
 
     localStorage.setItem('accessToken', data.accessToken);
     await fetchProfile(data.accessToken);

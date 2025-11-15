@@ -37,9 +37,12 @@ model Message {
   role            MessageRole
   content         String
   modelUsed       String?        // Which model generated the response (assistant only)
-  user            User?          @relation(fields: [userId], references: [id])
+
+  /// Relation back to User (optional, used for messages sent by the user)
+  user            User?         @relation(fields: [userId], references: [id])
   userId          String?
-  createdAt       DateTime       @default(now())
+
+  createdAt       DateTime      @default(now())
 }
 
 enum MessageRole {

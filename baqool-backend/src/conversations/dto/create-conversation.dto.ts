@@ -1,11 +1,13 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateConversationDto {
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   title?: string;
 
   @IsOptional()
   @IsString()
-  modelProfile?: string;
+  @MaxLength(50)
+  modelProfile?: string; // e.g. "gpt-4o"
 }

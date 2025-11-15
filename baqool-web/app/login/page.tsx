@@ -27,7 +27,7 @@ export default function LoginPage() {
   const onSubmit = async (values: FormData) => {
     setServerError(null);
     try {
-      const { data } = await api.post('/login', values);
+      const { data } = await api.post('/auth/login', values);
       // data.accessToken must come from your NestJS AuthService
       localStorage.setItem('accessToken', data.accessToken);
       router.replace('/');
@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    router.replace('/login');
+    router.replace('/auth/login');
   };
 
   return (

@@ -6,7 +6,9 @@ import {
   Post,
   Req,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { ConversationsService } from './conversations.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -17,42 +19,51 @@ import { AddMessageDto } from './dto/add-message.dto';
 export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}
 
-  // POST /conversations
+  private getUserIdFromRequest(req: Request): string {
+    const user = (req as any).user;
+    const userId = user?.userId ?? user?.id ?? user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedException('User not found in request');
+    }
+
+    return userId;
+  }
+
   @Post()
-  createConversation(@Req() req: any, @Body() dto: CreateConversationDto) {
-    const userId = req.user.userId; // from JwtStrategy.validate
+  createConversation(
+    @Req() req: Request,
+    @Body() dto: CreateConversationDto,
+  ) {
+    const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.createConversation(userId, dto);
   }
 
-  // GET /conversations
   @Get()
-  listConversations(@Req() req: any) {
-    const userId = req.user.userId;
+  listConversations(@Req() req: Request) {
+    const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.listConversations(userId);
   }
 
-  // GET /conversations/:id
   @Get(':id')
-  getConversation(@Req() req: any, @Param('id') id: string) {
-    const userId = req.user.userId;
+  getConversation(@Req() req: Request, @Param('id') id: string) {
+    const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.getConversation(id, userId);
   }
 
-  // POST /conversations/:id/messages
   @Post(':id/messages')
   addMessage(
-    @Req() req: any,
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() dto: AddMessageDto,
   ) {
-    const userId = req.user.userId;
+    const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.addMessage(id, userId, dto);
   }
 
-  // GET /conversations/:id/messages
   @Get(':id/messages')
-  listMessages(@Req() req: any, @Param('id') id: string) {
-    const userId = req.user.userId;
+  listMessages(@Req() req: Request, @Param('id') id: string) {
+    const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.listMessages(id, userId);
   }
 }

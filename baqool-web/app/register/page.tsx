@@ -28,7 +28,7 @@ export default function RegisterPage() {
   const onSubmit = async (values: FormData) => {
     setServerError(null);
     try {
-      const { data } = await api.post('/register', values);
+      const { data } = await api.post('/auth/register', values);
       localStorage.setItem('accessToken', data.accessToken);
       router.replace('/');
     } catch (e: any) {
