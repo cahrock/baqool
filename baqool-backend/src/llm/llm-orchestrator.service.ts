@@ -6,6 +6,7 @@ import { AnthropicProvider } from './anthropic.provider';
 import { GeminiProvider } from './gemini.provider';
 import { OpenaiProvider } from './openai.provider';
 import { LlmMessage, LlmProviderName, LlmResponse } from './llm.types';
+import { IntentType } from './openai.provider';
 
 @Injectable()
 export class LlmOrchestratorService {
@@ -48,7 +49,7 @@ export class LlmOrchestratorService {
   }
 
   /* TEMP: mock reply so we don't depend on external API during development */
-  
+
   // async generateAssistantReply(conversationId: string) {
   //   // TEMP: mock reply so we don't depend on external API during development
   //   return {
@@ -57,14 +58,16 @@ export class LlmOrchestratorService {
   //   };
   // }
 
-
-  async generateAssistantReply(conversationId: string): Promise<LlmResponse> {
+  async generateAssistantReply(
+    conversationId: string,
+    overrideModelProfile?: string,
+  ): Promise<LlmResponse> {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
         messages: {
           orderBy: { createdAt: 'asc' },
-          take: 30, // last N messages for context
+          take: 30,
         },
       },
     });
@@ -73,9 +76,14 @@ export class LlmOrchestratorService {
       throw new Error('Conversation not found');
     }
 
-    const { providerName, model } = this.resolveProvider(conversation.modelProfile);
+    const profileToUse =
+      overrideModelProfile ||
+      conversation.modelProfile ||
+      process.env.DEFAULT_MODEL_PROFILE ||
+      'gpt-4o';
 
-    // Build generic message history
+    const { providerName, model } = this.resolveProvider(profileToUse);
+
     const messages: LlmMessage[] = conversation.messages.map((m) => ({
       role:
         m.role === MessageRole.USER
@@ -88,5 +96,13 @@ export class LlmOrchestratorService {
 
     const provider = this.getProvider(providerName);
     return provider.generate({ model, messages });
+  }  
+
+  async previewRouting(
+    content: string,
+    lastModel?: string,
+  ): Promise<{ intent: IntentType; suggestedModel: string; reason: string }> {
+    // For now use OpenAI router; later you can plug in Gemini/Claude variants
+    return this.openai.classifyIntentAndModel(content, lastModel);
   }
 }

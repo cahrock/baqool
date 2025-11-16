@@ -1,8 +1,14 @@
-import { IsString, MaxLength, MinLength } from 'class-validator';
+// src/conversations/dto/add-message.dto.ts
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class AddMessageDto {
   @IsString()
-  @MinLength(1)
-  @MaxLength(4000)
+  @IsNotEmpty()
+  @MaxLength(8000)
   content: string;
+
+  // Optional model selector from the client ("gpt-4o", "gpt-4o-mini", etc.)
+  @IsOptional()
+  @IsString()
+  modelProfile?: string;
 }

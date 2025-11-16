@@ -4,6 +4,8 @@ import {
   Get,
   Param,
   Post,
+  Patch,
+  Delete,
   Req,
   UseGuards,
   UnauthorizedException,
@@ -13,6 +15,8 @@ import { ConversationsService } from './conversations.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { AddMessageDto } from './dto/add-message.dto';
+import { PreviewMessageDto } from './dto/preview-message.dto';
+import { UpdateConversationDto } from './dto/update-conversation.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('conversations')
@@ -51,6 +55,33 @@ export class ConversationsController {
     return this.conversationsService.getConversation(id, userId);
   }
 
+    // PATCH /conversations/:id
+  @Patch(':id')
+  updateConversation(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateConversationDto,
+  ) {
+    //const userId = req.user.userId;
+    const userId = this.getUserIdFromRequest(req);
+    return this.conversationsService.updateConversation(id, userId, dto);
+  }
+
+    // POST /conversations/:id/duplicate
+  @Post(':id/duplicate')
+  duplicateConversation(@Req() req: Request, @Param('id') id: string) {
+    const userId = this.getUserIdFromRequest(req);
+    return this.conversationsService.duplicateConversation(id, userId);
+  }
+
+  // DELETE /conversations/:id
+  @Delete(':id')
+  deleteConversation(@Req() req: Request, @Param('id') id: string) {
+    const userId = this.getUserIdFromRequest(req);
+    return this.conversationsService.deleteConversation(id, userId);
+  }
+
+
   @Post(':id/messages')
   addMessage(
     @Req() req: Request,
@@ -66,4 +97,11 @@ export class ConversationsController {
     const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.listMessages(id, userId);
   }
+
+  @Post('preview')
+  preview(@Body() dto: PreviewMessageDto, @Req() req: any) {
+    // At this point dto is validated by ValidationPipe
+    return this.conversationsService.preview(dto);
+  }
+
 }
