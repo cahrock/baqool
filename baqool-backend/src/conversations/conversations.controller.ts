@@ -23,6 +23,9 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}
 
+  /**
+   * Extract userId from the JWT payload attached by JwtAuthGuard.
+   */
   private getUserIdFromRequest(req: Request): string {
     const user = (req as any).user;
     const userId = user?.userId ?? user?.id ?? user?.sub;
@@ -34,6 +37,7 @@ export class ConversationsController {
     return userId;
   }
 
+  // POST /conversations
   @Post()
   createConversation(
     @Req() req: Request,
@@ -43,31 +47,46 @@ export class ConversationsController {
     return this.conversationsService.createConversation(userId, dto);
   }
 
-  @Get()
-  listConversations(@Req() req: Request) {
+  /**
+   * GET /conversations/archived
+   * Must be above `@Get(':id')` so it doesn't get captured by the :id route.
+   */
+  @Get('archived')
+  listArchived(@Req() req: Request) {
     const userId = this.getUserIdFromRequest(req);
-    return this.conversationsService.listConversations(userId);
+    return this.conversationsService.listArchivedConversations(userId);
   }
 
+  /**
+   * GET /conversations
+   * Returns *active* (non-archived) conversations.
+   */
+  @Get()
+  listActive(@Req() req: Request) {
+    const userId = this.getUserIdFromRequest(req);
+    return this.conversationsService.listActiveConversations(userId);
+  }
+
+  // GET /conversations/:id
   @Get(':id')
   getConversation(@Req() req: Request, @Param('id') id: string) {
     const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.getConversation(id, userId);
   }
 
-    // PATCH /conversations/:id
+  // PATCH /conversations/:id
+  // Used for inline rename, change modelProfile, pin/unpin, archive/unarchive, etc.
   @Patch(':id')
   updateConversation(
-    @Req() req: any,
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() dto: UpdateConversationDto,
   ) {
-    //const userId = req.user.userId;
     const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.updateConversation(id, userId, dto);
   }
 
-    // POST /conversations/:id/duplicate
+  // POST /conversations/:id/duplicate
   @Post(':id/duplicate')
   duplicateConversation(@Req() req: Request, @Param('id') id: string) {
     const userId = this.getUserIdFromRequest(req);
@@ -81,7 +100,7 @@ export class ConversationsController {
     return this.conversationsService.deleteConversation(id, userId);
   }
 
-
+  // POST /conversations/:id/messages
   @Post(':id/messages')
   addMessage(
     @Req() req: Request,
@@ -92,16 +111,16 @@ export class ConversationsController {
     return this.conversationsService.addMessage(id, userId, dto);
   }
 
+  // GET /conversations/:id/messages
   @Get(':id/messages')
   listMessages(@Req() req: Request, @Param('id') id: string) {
     const userId = this.getUserIdFromRequest(req);
     return this.conversationsService.listMessages(id, userId);
   }
 
+  // POST /conversations/preview
   @Post('preview')
-  preview(@Body() dto: PreviewMessageDto, @Req() req: any) {
-    // At this point dto is validated by ValidationPipe
+  preview(@Body() dto: PreviewMessageDto) {
     return this.conversationsService.preview(dto);
   }
-
 }
